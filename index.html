@@ -5,7 +5,7 @@
         <title>WebIOPi | Light Control</title>
         <script type="text/javascript" src="/webiopi.js"></script>
         <script type="text/javascript">
-	var G_VAL, G_VAL2;
+	var G_VAL, G_VAL2, G_TEMP, G_PRES, G_HUMI;
         webiopi().ready(function() {
 		// http://webiopi.trouch.com/Tutorial_Macros.html (append segawa start)
 		var updateLightHours = function(macro, args, response) {
@@ -57,6 +57,10 @@
 	    $("#Label1").text(G_VAL);
 	    webiopi().callMacro("mcp3002AnalogRead1",[], mcp3002Callback2);
 	    $("#Label2").text(G_VAL2);
+	    webiopi().callMacro("i2cReadData",[], i2cCallback);
+	    $("#Label3").text(G_TEMP);
+	    $("#Label4").text(G_HUMI);
+	    $("#Label5").text(G_PRES);
 	}
 
 	function mcp3002Callback(macro, args, response) {
@@ -66,6 +70,12 @@
 	function mcp3002Callback2(macro, args, response) {
 	    //var hours = response.split(";");
 	    G_VAL2 = response;
+	}
+	function i2cCallback(macro, args, response) {
+	    var arry = response.split(";");
+	    G_TEMP = arry[0];
+	    G_HUMI = arry[1];
+	    G_PRES = arry[2];
 	}
 	<!-- http://webiopi.trouch.com/Tutorial_Devices.html (append segawa) -->
                 
@@ -98,7 +108,10 @@
 	Turn On at :<input type="text" id="inputOn" /><br/>
 	Turn Off at: <input type="text" id="inputOff" /><br/>
 	土壌水分・・・<span id="Label1">Label[1]</span><br/>
-	明るさ・・・・<span id="Label2">Label[2]</span>
+	明るさ・・・・<span id="Label2">Label[2]</span><br/>
+	温度・・・・<span id="Label3">Label[3]</span><br/>
+	湿度・・・・<span id="Label4">Label[4]</span><br/>
+	気圧・・・・<span id="Label5">Label[5]</span><br/>
 	<div id="controls"></div>
 	</div>
 </body>
