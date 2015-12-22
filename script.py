@@ -7,7 +7,7 @@ from webiopi.devices.analog.mcp3x0x import MCP3002
 import smbus
 import time
 
-webiopi.setDebug()
+#webiopi.setDebug()
 
 mcp = MCP3002()
 
@@ -54,6 +54,11 @@ def setup():
 def loop():
     # retrieve current datetime
     now = datetime.datetime.now()
+
+    #/if((HOUR_ON >= 8) and (HOUR_OFF <=22)):
+    #/    webiopi.debug( "ON 8======-->OFF 22" )
+    #/else:
+    #/    webiopi.debug( "OXXXXXXXXX" )
 
     # toggle light ON all days at the correct time
     if ((now.hour == HOUR_ON) and (now.minute == 0) and (now.second == 0)):

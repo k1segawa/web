@@ -11,9 +11,12 @@
 		var updateLightHours = function(macro, args, response) {
 		    var hours = response.split(";");
 		    // Following lines use jQuery functions
+		    $("#work").val(hours[1]);
+		    $("#Label1").text(hours[1]);
 		    $("#inputOn").val(hours[0]);
 		    $("#inputOff").val(hours[1]);
-		    $("#Label1").text(webiopi().callMacro("mcp3002AnalogRead",[],updateLightHours));
+		    ////$("#Label1").text(webiopi().callMacro("mcp3002AnalogRead",[],updateLightHours));
+		    $("#Label1").text(webiopi().callMacro("i2cReadData",[],updateLightHours));
 		    //$("#Label1").text("Hello");
 		}
 
@@ -46,7 +49,7 @@
                 webiopi().refreshGPIO(true);
 
 		// SPI analogRead
-		setInterval(updateUI, 1000);
+		setInterval(updateUI, 3000);
 		// SPI analogRead
         });
 
@@ -54,7 +57,7 @@
 	function updateUI() {
 	    webiopi().callMacro("mcp3002AnalogRead",[], mcp3002Callback);
 	    //s = str(G_VAL);
-	    $("#Label1").text(G_VAL);
+	    /////$("#Label1").text(G_VAL);
 	    webiopi().callMacro("mcp3002AnalogRead1",[], mcp3002Callback2);
 	    $("#Label2").text(G_VAL2);
 	    webiopi().callMacro("i2cReadData",[], i2cCallback);
@@ -107,6 +110,7 @@
 	<div align="center">
 	Turn On at :<input type="text" id="inputOn" /><br/>
 	Turn Off at: <input type="text" id="inputOff" /><br/>
+	work: <input type="text" id="work" /><br/>
 	土壌水分・・・<span id="Label1">Label[1]</span><br/>
 	明るさ・・・・<span id="Label2">Label[2]</span><br/>
 	温度・・・・<span id="Label3">Label[3]</span><br/>
