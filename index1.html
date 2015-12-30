@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>WebIOPi | Light Control</title>
+        <script type="text/javascript" src="/webiopi.js"></script>
+        <script type="text/javascript">
+	var G_VAL, G_VAL2, G_TEMP, G_PRES, G_HUMI;
+        webiopi().ready(function() {
+		// http://webiopi.trouch.com/Tutorial_Macros.html (append segawa start)
+		var updateLightHours = function(macro, args, response) {
+		    var hours = response.split(";");
+		    // Following lines use jQuery functions
+		    $("#work").val(hours[1]);
+		    $("#Label1").text(hours[1]);
+		    $("#inputOn").val(hours[0]);
+		    $("#inputOff").val(hours[1]);
+		    ////$("#Label1").text(webiopi().callMacro("mcp3002AnalogRead",[],updateLightHours));
+		    $("#Label1").text(webiopi().callMacro("i2cReadData",[],updateLightHours));
+		    //$("#Label1").text("Hello");
+		}
+
+		// Immediately call getLightHours macro to update the UI with current values
+		// "getLightHours" refers to macro name
+		    // [] is an empty array, because getLightHours macro does not take any argument
+		    // updateLightHours is the callback function, defined above
+		    webiopi().callMacro("getLightHours", [], updateLightHours);
+
+		// Create a button to call setLightHours macro
+		var sendButton = webiopi().createButton("sendButton", "Send", function() {
+		   // Arguments sent to the macro
+			var hours = [$("#inputOn").val(), $("#inputOff").val()];
+		   // Call the macro
+                        webiopi().callMacro("setLightHours", hours, updateLightHours);
+                });
+
+		// Append the button to the controls box using a jQuery function
+		   $("#controls").append(sendButton);
+		// http://webiopi.trouch.com/Tutorial_Macros.html (append segawa end)
+
+                // Create a "Light" labeled button for GPIO 17
+                var button = webiopi().createGPIOButton(17, "Light");
+
+                // Append button to HTML element with ID="controls" using jQuery
+                $("#controls").append(button);
+
+                // Refresh GPIO buttons
+                // pass true to refresh repeatedly of false to refresh once
+                webiopi().refreshGPIO(true);
+
+		// SPI analogRead
+		setInterval(updateUI, 3000);
+		// SPI analogRead
+        });
+
+	<!-- http://webiopi.trouch.com/Tutorial_Devices.html (append segawa) -->
+	function updateUI() {
+	    webiopi().callMacro("mcp3002AnalogRead",[], mcp3002Callback);
+	    //s = str(G_VAL);
+	    /////$("#Label1").text(G_VAL);
+	    webiopi().callMacro("mcp3002AnalogRead1",[], mcp3002Callback2);
+	    $("#Label2").text(G_VAL2);
+	    webiopi().callMacro("i2cReadData",[], i2cCallback);
+	    $("#Label3").text(G_TEMP);
+	    $("#Label4").text(G_HUMI);
+	    $("#Label5").text(G_PRES);
+	}
+
+	function mcp3002Callback(macro, args, response) {
+	    //var hours = response.split(";");
+	    G_VAL = response;
+	}
+	function mcp3002Callback2(macro, args, response) {
+	    //var hours = response.split(";");
+	    G_VAL2 = response;
+	}
+	function i2cCallback(macro, args, response) {
+	    var arry = response.split(";");
+	    G_TEMP = arry[0];
+	    G_HUMI = arry[1];
+	    G_PRES = arry[2];
+	}
+	<!-- http://webiopi.trouch.com/Tutorial_Devices.html (append segawa) -->
+                
+        </script>
+        <style type="text/css">
+                button {
+                        display: block;
+                        margin: 5px 5px 5px 5px;
+                        width: 160px;
+                        height: 45px;
+                        font-size: 24pt;
+                        font-weight: bold;
+                        color: white;
+                }
+                
+                #gpio17.LOW {
+                        background-color: Black;
+                }
+                
+                #gpio17.HIGH {
+                        background-color: Blue;
+                }
+        </style>
+</head>
+<body>
+	<!-- http://webiopi.trouch.com/Tutorial_Macros.html (append segawa)
+        <div id="controls" align="center"></div>
+	-->
+	<div align="center">
+	Turn On at :<input type="text" id="inputOn" /><br/>
+	Turn Off at: <input type="text" id="inputOff" /><br/>
+	work: <input type="text" id="work" /><br/>
+	土壌水分・・・<span id="Label1">Label[1]</span><br/>
+	明るさ・・・・<span id="Label2">Label[2]</span><br/>
+	温度・・・・<span id="Label3">Label[3]</span><br/>
+	湿度・・・・<span id="Label4">Label[4]</span><br/>
+	気圧・・・・<span id="Label5">Label[5]</span><br/>
+	<div id="controls"></div>
+	</div>
+</body>
+</html>
+
