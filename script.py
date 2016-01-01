@@ -7,7 +7,7 @@ from webiopi.devices.analog.mcp3x0x import MCP3002
 import smbus
 import time
 
-#webiopi.setDebug()
+webiopi.setDebug()
 
 mcp = MCP3002()
 
@@ -28,7 +28,7 @@ G_TEMP = 0.0
 G_PRES = 0.0
 G_HUMI = 0.0
 
-LIGHT = 17 # GPIO pin using BCM numbering
+LIGHT = 7 # GPIO pin using BCM numbering
 
 HOUR_ON  = 8  # Turn Light ON at 08:00
 HOUR_OFF = 18 # Turn Light OFF at 18:00
@@ -40,9 +40,6 @@ def setup():
 
     # retrieve current datetime
     now = datetime.datetime.now()
-    webiopi.debug ("-----")
-    webiopi.debug (now)
-    webiopi.debug ("-----")
 
     # test if we are between ON time and tun the light ON
     if ((now.hour >= HOUR_ON) and (now.hour < HOUR_OFF)):
@@ -55,18 +52,20 @@ def loop():
     # retrieve current datetime
     now = datetime.datetime.now()
 
-    #/if((HOUR_ON >= 8) and (HOUR_OFF <=22)):
-    #/    webiopi.debug( "ON 8======-->OFF 22" )
-    #/else:
-    #/    webiopi.debug( "OXXXXXXXXX" )
+    if((HOUR_ON == 8) and (HOUR_OFF == 18)):
+        webiopi.debug( "segawa:ON 8======-->OFF 22" )
+    else:
+        webiopi.debug( "segawa:OXXXXXXXXX" )
 
     # toggle light ON all days at the correct time
-    if ((now.hour == HOUR_ON) and (now.minute == 0) and (now.second == 0)):
+#    if ((now.hour == HOUR_ON) and (now.minute == 0) and (now.second == 0)):
+    if (now.hour >= HOUR_ON):
         if (GPIO.digitalRead(LIGHT) == GPIO.LOW):
             GPIO.digitalWrite(LIGHT, GPIO.HIGH)
 
     # toggle light OFF
-    if ((now.hour == HOUR_OFF) and (now.minute == 0) and (now.second == 0)):
+#    if ((now.hour == HOUR_OFF) and (now.minute == 0) and (now.second == 0)):
+    if (now.hour >= HOUR_OFF):
         if (GPIO.digitalRead(LIGHT) == GPIO.HIGH):
             GPIO.digitalWrite(LIGHT, GPIO.LOW)
 
@@ -87,18 +86,17 @@ def setLightHours(on, off):
     global HOUR_ON, HOUR_OFF
     HOUR_ON = int(on)
     HOUR_OFF = int(off)
+    webiopi.debug( "segawa:setLightHours---on/off : " + str(on) + str(off) )
     return getLightHours()
 
 @webiopi.macro
 def mcp3002AnalogRead():
     v = mcp.analogRead(0)
-    webiopi.debug( "---------------Ch0 : " + str(v) )
     return str(v)
 
 @webiopi.macro
 def mcp3002AnalogRead1():
     v = mcp.analogRead(1)
-    webiopi.debug( "---------------Ch1 : " + str(v) )
     return str(v)
 
 def writeReg(reg_address, data):
@@ -143,7 +141,6 @@ def get_calib_param():
     for i in range(0,6):
         if digH[i] & 0x8000:
             digH[i] = (-digH[i] ^ 0xFFFF) + 1
-    webiopi.debug( "---------------get_calib_param : called" )
 
 @webiopi.macro
 def i2cReadData():
@@ -161,7 +158,7 @@ def i2cReadData():
     #print "%-6.2f," % (temperature),
     #print "%7.2f" % (pressure/100)
     #print "%6.2f," % (var_h),
-    webiopi.debug( "---------------I2C : " + str("%-6.2f;%7.2f;%6.2f" % (G_TEMP, G_HUMI, G_PRES)) )
+    webiopi.debug( "segawa:---------------I2C : " + str("%-6.2f;%7.2f;%6.2f" % (G_TEMP, G_HUMI, G_PRES)) )
     return "%-6.2f;%7.2f;%6.2f" % (G_TEMP, G_HUMI, G_PRES)
 
 def compensate_P(adc_P):
@@ -189,7 +186,6 @@ def compensate_P(adc_P):
 
     #print "pressure : %7.2f hPa" % (pressure/100)
     #print "%7.2f" % (pressure/100)
-    webiopi.debug( "---------------I2C PRES: " + str("%7.2f" % G_PRES) )
     G_PRES = pressure/100
 
 def compensate_T(adc_T):
@@ -201,7 +197,6 @@ def compensate_T(adc_T):
     temperature = t_fine / 5120.0
     #print "temp : %-6.2f ℃" % (temperature) 
     #print "%-6.2f," % (temperature),
-    webiopi.debug( "---------------I2C TEMP: " + str("%-6.2f" % G_TEMP) )
     G_TEMP = temperature
 
 def compensate_H(adc_H):
@@ -238,4 +233,3 @@ def i2c_setup():
     writeReg(0xF2,ctrl_hum_reg)
     writeReg(0xF4,ctrl_meas_reg)
     writeReg(0xF5,config_reg)
-    webiopi.debug( "---------------i2c_setup : called" )
